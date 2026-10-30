@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="460" viewBox="0 0 1200 460"
+     role="img" aria-labelledby="pipeTitle pipeDesc">
+  <title id="pipeTitle">board_etf_match.py 的四步匹配漏斗与打分权重</title>
+  <desc id="pipeDesc">上半部为四步流程：一、从 MAC 伪板块 11005 取全部场内 ETF，按成交额过滤并剔除债券、货币、跨境、商品，默认再剔除宽基；二、与板块指数做 60 日日收益回归，取 R² 前 30 并并入名称命中板块关键词者，得到短名单；三、短名单与板块指数做 20 日 30 分钟收益回归，得到日内 R² 与 β；四、四维加权打分并对同主题去重。下半部为权重构成条：日内 R² 占 50%，日线 R² 占 20%，名称命中占 15%，流动性占 15%。</desc>
+
+  <rect width="1200" height="460" rx="26" fill="#0A0D13"/>
+
+  <text x="56" y="46" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+        font-size="20" fill="#7D8CA5">board_etf_match.py · 四步漏斗</text>
+
+  <!-- ============ 四步卡片 ============ -->
+  <g id="funnel" transform="translate(0 76)">
+
+    <!-- 1 -->
+    <g transform="translate(56 0)">
+      <rect width="250" height="170" rx="14" fill="#111826" stroke="#232E42" stroke-width="1.4"/>
+      <circle cx="26" cy="30" r="16" fill="#172032" stroke="#33415C" stroke-width="1.4"/>
+      <text x="26" y="36" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="18" fill="#9FB0C9">1</text>
+      <text x="56" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+            font-size="24" font-weight="600" fill="#E8EEF7">ETF 全集</text>
+      <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#7D8CA5">
+        <text x="26" y="76">MAC 伪板块 11005</text>
+        <text x="26" y="102">按成交额过滤</text>
+        <text x="26" y="128">剔除债券·货币·商品</text>
+        <text x="26" y="154">跨境与宽基默认剔除</text>
+      </g>
+    </g>
+
+    <!-- 2 -->
+    <g transform="translate(335 0)">
+      <rect width="250" height="170" rx="14" fill="#111826" stroke="#232E42" stroke-width="1.4"/>
+      <circle cx="26" cy="30" r="16" fill="#172032" stroke="#33415C" stroke-width="1.4"/>
+      <text x="26" y="36" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="18" fill="#9FB0C9">2</text>
+      <text x="56" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+            font-size="24" font-weight="600" fill="#E8EEF7">相关性短名单</text>
+      <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#7D8CA5">
+        <text x="26" y="76">60 日日收益回归</text>
+        <text x="26" y="102">取 R² 前 30</text>
+        <text x="26" y="128">名称命中关键词者并入</text>
+      </g>
+    </g>
+
+    <!-- 3 -->
+    <g transform="translate(614 0)">
+      <rect width="250" height="170" rx="14" fill="#111826" stroke="#232E42" stroke-width="1.4"/>
+      <circle cx="26" cy="30" r="16" fill="#172032" stroke="#33415C" stroke-width="1.4"/>
+      <text x="26" y="36" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="18" fill="#9FB0C9">3</text>
+      <text x="56" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+            font-size="24" font-weight="600" fill="#E8EEF7">日内回归</text>
+      <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#7D8CA5">
+        <text x="26" y="76">20 日 30 分钟收益回归</text>
+        <text x="26" y="102">得到 R² 与 β</text>
+        <text x="26" y="128">--freq 可改周期</text>
+      </g>
+    </g>
+
+    <!-- 4 -->
+    <g transform="translate(893 0)">
+      <rect width="250" height="170" rx="14" fill="#1B1220" stroke="#3A2029" stroke-width="1.4"/>
+      <circle cx="26" cy="30" r="16" fill="#2A1620" stroke="#8C4A52" stroke-width="1.4"/>
+      <text x="26" y="36" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="18" fill="#FFB3B8">4</text>
+      <text x="56" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+            font-size="24" font-weight="600" fill="#FFB3B8">打分 · 去重</text>
+      <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#C2929A">
+        <text x="26" y="76">四维加权打分</text>
+        <text x="26" y="102">权重见下方构成条</text>
+        <text x="26" y="128">同主题只留最高分</text>
+      </g>
+    </g>
+
+    <!-- 箭头 -->
+    <g fill="#33415C" stroke="#33415C">
+      <path d="M310 161 H329" stroke-width="1.6" fill="none"/>
+      <polygon points="335,161 327,157 327,165"/>
+      <path d="M589 161 H608" stroke-width="1.6" fill="none"/>
+      <polygon points="614,161 606,157 606,165"/>
+      <path d="M868 161 H887" stroke-width="1.6" fill="none"/>
+      <polygon points="893,161 885,157 885,165"/>
+    </g>
+  </g>
+
+  <!-- ============ 权重构成 ============ -->
+  <g id="weights" transform="translate(56 282)">
+    <rect width="1088" height="134" rx="14" fill="#0F1520" stroke="#232E42" stroke-width="1.4"/>
+
+    <text x="28" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="20" fill="#8A99B0">SCORE = 0.5·R²_intraday + 0.2·R²_1d + 0.15·name_hit + 0.15·liquidity_pct</text>
+
+    <defs>
+      <clipPath id="barClip">
+        <rect x="28" y="54" width="1032" height="36" rx="8"/>
+      </clipPath>
+    </defs>
+
+    <g clip-path="url(#barClip)">
+      <rect x="28" y="54" width="516" height="36" fill="#FF4D5A"/>
+      <rect x="544" y="54" width="206" height="36" fill="#F7B955"/>
+      <rect x="750" y="54" width="155" height="36" fill="#4CC9F0"/>
+      <rect x="905" y="54" width="155" height="36" fill="#6C7A99"/>
+    </g>
+
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20" text-anchor="middle">
+      <text x="286" y="78" fill="#FFFFFF" font-weight="700">0.5</text>
+      <text x="647" y="78" fill="#1A1205" font-weight="700">0.2</text>
+      <text x="827" y="78" fill="#0A0D13" font-weight="700">0.15</text>
+      <text x="982" y="78" fill="#FFFFFF" font-weight="700">0.15</text>
+    </g>
+
+    <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+       font-size="20" fill="#9FB0C9" text-anchor="middle">
+      <text x="286" y="112">日内 R² · 50%</text>
+      <text x="647" y="112">日线 R² · 20%</text>
+      <text x="827" y="112">名称命中 · 15%</text>
+      <text x="982" y="112">流动性 · 15%</text>
+    </g>
+  </g>
+</svg>

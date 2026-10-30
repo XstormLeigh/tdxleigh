@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="336" viewBox="0 0 1200 336"
+     role="img" aria-labelledby="csTitle csDesc">
+  <title id="csTitle">为什么更快：一次取数替代三次</title>
+  <desc id="csDesc">对比图。上排是原本做法：分别以 days 3、5、10 连跑三次 easy-tdx 命令，每次各取一次 K 线，最后人工比对三张榜单找共同板块。下排是本脚本做法：每个板块只拉一次日 K 线，长度取 max(days) 加缓冲，一次算出全部窗口涨跌幅，再自动取交集，因此约快三倍。</desc>
+
+  <rect width="1200" height="336" rx="26" fill="#0A0D13"/>
+
+  <!-- ============ 行 A：原本做法 ============ -->
+  <g id="row-original">
+    <text x="56" y="96" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+          font-size="27" font-weight="600" fill="#C6D2E2">原本做法</text>
+    <text x="56" y="122" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="18" fill="#7D8CA5">easy-tdx 连跑三次</text>
+
+    <g id="rowA-cards" text-anchor="middle">
+      <rect x="350" y="60" width="150" height="80" rx="12" fill="#131A28" stroke="#232E42" stroke-width="1.4"/>
+      <text x="425" y="96" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="21" fill="#AEBBD0">--days 3</text>
+      <text x="425" y="122" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="17" fill="#6C7A99">取数 × 1</text>
+
+      <rect x="552" y="60" width="150" height="80" rx="12" fill="#131A28" stroke="#232E42" stroke-width="1.4"/>
+      <text x="627" y="96" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="21" fill="#AEBBD0">--days 5</text>
+      <text x="627" y="122" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="17" fill="#6C7A99">取数 × 1</text>
+
+      <rect x="754" y="60" width="150" height="80" rx="12" fill="#131A28" stroke="#232E42" stroke-width="1.4"/>
+      <text x="829" y="96" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="21" fill="#AEBBD0">--days 10</text>
+      <text x="829" y="122" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="17" fill="#6C7A99">取数 × 1</text>
+
+      <rect x="956" y="60" width="188" height="80" rx="12" fill="#172032" stroke="#33415C" stroke-width="1.4"/>
+      <text x="1050" y="96" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+            font-size="22" fill="#C6D2E2">人工比对</text>
+      <text x="1050" y="122" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="17" fill="#6C7A99">三张榜找共同项</text>
+    </g>
+
+    <!-- 连接箭头 -->
+    <g id="rowA-arrows" fill="#33415C" stroke="#33415C">
+      <path d="M506 100 H540" stroke-width="1.6" fill="none"/>
+      <polygon points="546,100 538,96 538,104"/>
+      <path d="M708 100 H742" stroke-width="1.6" fill="none"/>
+      <polygon points="748,100 740,96 740,104"/>
+      <path d="M910 100 H944" stroke-width="1.6" fill="none"/>
+      <polygon points="950,100 942,96 942,104"/>
+    </g>
+  </g>
+
+  <!-- 行间过渡 -->
+  <g id="transition">
+    <path d="M380 148 V194" stroke="#33415C" stroke-width="1.6" stroke-dasharray="5 4" fill="none"/>
+    <polygon points="380,200 374,191 386,191" fill="#33415C"/>
+    <text x="398" y="180" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="18" fill="#6C7A99">改成本脚本</text>
+  </g>
+
+  <!-- ============ 行 B：本脚本做法 ============ -->
+  <g id="row-script">
+    <text x="56" y="236" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+          font-size="27" font-weight="600" fill="#FF8A92">本脚本</text>
+    <text x="56" y="262" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="18" fill="#7D8CA5">一次取数 · 自动交集</text>
+
+    <rect x="150" y="206" width="116" height="32" rx="16" fill="#FF4D5A"/>
+    <text x="208" y="228" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif"
+          font-size="20" font-weight="700" fill="#FFFFFF">≈ 3×</text>
+
+    <g id="rowB-cards" text-anchor="middle">
+      <rect x="350" y="200" width="232" height="80" rx="12" fill="#1B1220" stroke="#3A2029" stroke-width="1.4"/>
+      <text x="466" y="236" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+            font-size="22" font-weight="600" fill="#FFB3B8">单次日 K 拉取</text>
+      <text x="466" y="262" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="17" fill="#C2929A">长度 = max(days)+10</text>
+
+      <rect x="634" y="200" width="266" height="80" rx="12" fill="#1B1220" stroke="#3A2029" stroke-width="1.4"/>
+      <text x="767" y="236" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+            font-size="22" font-weight="600" fill="#FFB3B8">一次算多窗口涨跌幅</text>
+      <text x="767" y="262" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="17" fill="#C2929A">3/5/10 日共用这批 K 线</text>
+
+      <rect x="952" y="200" width="192" height="80" rx="12" fill="#1B1220" stroke="#3A2029" stroke-width="1.4"/>
+      <text x="1048" y="236" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+            font-size="22" font-weight="600" fill="#FFB3B8">自动取交集</text>
+      <text x="1048" y="262" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="17" fill="#C2929A">都进 Top-N 才输出</text>
+    </g>
+
+    <g id="rowB-arrows" fill="#8C4A52" stroke="#8C4A52">
+      <path d="M588 240 H628" stroke-width="1.6" fill="none"/>
+      <polygon points="634,240 626,236 626,244"/>
+      <path d="M906 240 H946" stroke-width="1.6" fill="none"/>
+      <polygon points="952,240 944,236 944,244"/>
+    </g>
+  </g>
+</svg>

@@ -1,6 +1,14 @@
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="tdxleigh：基于通达信 MAC 行情的板块量化工具集——一次取数算出 3/5/10 日板块涨幅榜的 Top-N 交集（共振板块），再用相关性匹配可直接交易的场内 ETF">
+</p>
+
 # tdxleigh
 
 板块量化小工具集，基于 **[easy-tdx](https://github.com/handsomejustin/easy-tdx) 1.32.7**（导入名 `easy_tdx`，CLI `easy-tdx`）的 MAC 通达信行情。
+
+**典型流程**：先跑 **共振榜** → 再对板块跑 **ETF 匹配**。
+
+## 工具一览
 
 | 文件 | 作用 |
 |------|------|
@@ -9,9 +17,7 @@
 | `cli_output.py` | `--table` 输出（CJK 对齐；JSON/CSV 仍走 `easy_tdx`） |
 | `test/` | pytest 单元测试（替身客户端，无需联网） |
 
-典型流程：先跑 **共振榜** → 再对板块跑 **ETF 匹配**。
-
-## 环境（uv）
+## 快速开始（uv）
 
 需要 [uv](https://docs.astral.sh/uv/) 与 Python 3.12+（`requires-python = >=3.12,<3.14`）。
 
@@ -30,6 +36,8 @@ Nu 壳别名示例（见 `config.nu`）：`tdxe` → `uv run … easy-tdx`，`td
 ---
 
 ## `board_change_consensus.py` — 板块共振榜
+
+<img src="./assets/readme/consensus-faster.svg" width="100%" alt="原本做法是对每个窗口连跑一次 easy-tdx 并人工比对三张榜单；本脚本改为每个板块只拉一次日 K 线、一次算出全部窗口涨跌幅并自动取交集，约快三倍">
 
 ### 做什么
 
@@ -68,6 +76,8 @@ uv run python board_change_consensus.py --type HY --asc --table          # 跌�
 
 ## `board_etf_match.py` — 板块 → ETF
 
+<img src="./assets/readme/etf-match-pipeline.svg" width="100%" alt="ETF 匹配四步漏斗：全集过滤、60 日日收益回归出短名单、20 日 30 分钟日内回归、四维加权打分；权重为日内 R² 50%、日线 R² 20%、名称命中 15%、流动性 15%">
+
 ### 匹配方法
 
 1. ETF 全集：MAC 伪板块 `11005`，按成交额过滤，剔除债券/货币/跨境/商品，默认剔除宽基。
@@ -101,3 +111,7 @@ uv run python board_etf_match.py --tickers-only 881289 881007
 ```bash
 uv run pytest
 ```
+
+## License
+
+[MIT](LICENSE) © XstormLeigh

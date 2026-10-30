@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400"
+     role="img" aria-labelledby="heroTitle heroDesc">
+  <title id="heroTitle">tdxleigh — 通达信板块量化工具集</title>
+  <desc id="heroDesc">左侧为项目名与一句话价值：一次取数算出 3/5/10 日板块涨幅榜的 Top-N 交集。右侧是多窗口 Top-N 交集示意图：A 到 E 五个板块在 3 日、5 日、10 日三个窗口下各自是否进入 Top-N，只有同时在三个窗口都进榜的板块 B 才作为共振板块输出。</desc>
+
+  <rect width="1200" height="400" rx="26" fill="#0A0D13"/>
+
+  <!-- ============ 左：身份区 ============ -->
+  <g id="identity" transform="translate(52 44)">
+
+    <!-- 眉标：迷你 K 线母题 + 定位 -->
+    <g id="eyebrow">
+      <rect x="1.6" y="0" width="0.9" height="20" fill="#21C77E" opacity=".55"/>
+      <rect x="0" y="6" width="4" height="10" rx="1" fill="#21C77E"/>
+      <rect x="10.6" y="2" width="0.9" height="18" fill="#FF4D5A" opacity=".55"/>
+      <rect x="9" y="3" width="4" height="11" rx="1" fill="#FF4D5A"/>
+      <rect x="19.6" y="4" width="0.9" height="16" fill="#FF4D5A" opacity=".55"/>
+      <rect x="18" y="6" width="4" height="12" rx="1" fill="#FF4D5A"/>
+      <text x="30" y="15" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="18" letter-spacing="1.6" fill="#7D8CA5">通达信 MAC 行情 · 板块量化工具集</text>
+    </g>
+
+    <text x="0" y="100" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+          font-size="76" font-weight="700" letter-spacing="-1" fill="#FFFFFF">tdxleigh</text>
+
+    <text x="0" y="150" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+          font-size="23" font-weight="500" fill="#C6D2E2">一次取数，同时算出 3 / 5 / 10 日的板块涨幅榜</text>
+    <text x="0" y="184" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+          font-size="23" font-weight="500" fill="#C6D2E2">取 Top-N 交集得到共振板块，再匹配能买的场内 ETF</text>
+
+    <!-- 技术栈 chips -->
+    <g id="stack" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+       font-size="17" fill="#9FB0C9" text-anchor="middle">
+      <rect x="0" y="214" width="154" height="30" rx="15" fill="#111826" stroke="#232E42" stroke-width="1.4"/>
+      <text x="77" y="235">Python 3.12+</text>
+      <rect x="166" y="214" width="54" height="30" rx="15" fill="#111826" stroke="#232E42" stroke-width="1.4"/>
+      <text x="193" y="235">uv</text>
+      <rect x="232" y="214" width="186" height="30" rx="15" fill="#111826" stroke="#232E42" stroke-width="1.4"/>
+      <text x="325" y="235">easy-tdx 1.32.7</text>
+      <rect x="430" y="214" width="96" height="30" rx="15" fill="#111826" stroke="#232E42" stroke-width="1.4"/>
+      <text x="478" y="235">pytest</text>
+    </g>
+
+    <!-- 首条命令 -->
+    <g id="first-command">
+      <rect x="0" y="266" width="620" height="48" rx="12" fill="#0C111C" stroke="#232E42" stroke-width="1.4"/>
+      <text x="20" y="296" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="18" fill="#21C77E">$</text>
+      <text x="44" y="296" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="18" fill="#AEBBD0">uv run python board_change_consensus.py --table</text>
+      <rect x="556" y="283" width="8" height="17" fill="#4CC9F0" opacity=".75"/>
+    </g>
+  </g>
+
+  <!-- ============ 右：多窗口 Top-N 交集 ============ -->
+  <g id="proof" transform="translate(716 36)">
+    <rect width="440" height="322" rx="14" fill="#0F1520" stroke="#232E42" stroke-width="1.4"/>
+
+    <text x="24" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="20" fill="#8A99B0">多窗口 TOP-N 交集</text>
+
+    <!-- 窗口列 -->
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+       font-size="20" fill="#FF8A92" text-anchor="middle">
+      <g transform="translate(72 0)">
+        <rect y="54" width="105" height="32" rx="8" fill="#1B1220" stroke="#3A2029" stroke-width="1.4"/>
+        <text x="52.5" y="76">3 日</text>
+      </g>
+      <g transform="translate(191 0)">
+        <rect y="54" width="105" height="32" rx="8" fill="#1B1220" stroke="#3A2029" stroke-width="1.4"/>
+        <text x="52.5" y="76">5 日</text>
+      </g>
+      <g transform="translate(310 0)">
+        <rect y="54" width="105" height="32" rx="8" fill="#1B1220" stroke="#3A2029" stroke-width="1.4"/>
+        <text x="52.5" y="76">10 日</text>
+      </g>
+    </g>
+
+    <text x="24" y="103" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="17" fill="#55637A">板块</text>
+
+    <!-- 进榜矩阵：3日→A,B,D；5日→B,C,E；10日→B,D,E；交集=B -->
+    <g id="matrix">
+      <!-- 列 A -->
+      <g transform="translate(72 0)">
+        <rect y="112" width="105" height="24" rx="7" fill="#FF4D5A" fill-opacity=".20" stroke="#FF4D5A" stroke-opacity=".55" stroke-width="1.4"/>
+        <circle cx="52.5" cy="124" r="4" fill="#FF4D5A"/>
+        <rect y="142" width="105" height="24" rx="7" fill="#FF4D5A" fill-opacity=".20" stroke="#FF4D5A" stroke-opacity=".55" stroke-width="1.4"/>
+        <circle cx="52.5" cy="154" r="4" fill="#FF4D5A"/>
+        <rect y="172" width="105" height="24" rx="7" fill="#141B28" stroke="#232E42" stroke-width="1.4"/>
+        <rect y="202" width="105" height="24" rx="7" fill="#FF4D5A" fill-opacity=".20" stroke="#FF4D5A" stroke-opacity=".55" stroke-width="1.4"/>
+        <circle cx="52.5" cy="214" r="4" fill="#FF4D5A"/>
+        <rect y="232" width="105" height="24" rx="7" fill="#141B28" stroke="#232E42" stroke-width="1.4"/>
+      </g>
+      <!-- 列 B -->
+      <g transform="translate(191 0)">
+        <rect y="112" width="105" height="24" rx="7" fill="#141B28" stroke="#232E42" stroke-width="1.4"/>
+        <rect y="142" width="105" height="24" rx="7" fill="#FF4D5A" fill-opacity=".20" stroke="#FF4D5A" stroke-opacity=".55" stroke-width="1.4"/>
+        <circle cx="52.5" cy="154" r="4" fill="#FF4D5A"/>
+        <rect y="172" width="105" height="24" rx="7" fill="#FF4D5A" fill-opacity=".20" stroke="#FF4D5A" stroke-opacity=".55" stroke-width="1.4"/>
+        <circle cx="52.5" cy="184" r="4" fill="#FF4D5A"/>
+        <rect y="202" width="105" height="24" rx="7" fill="#141B28" stroke="#232E42" stroke-width="1.4"/>
+        <rect y="232" width="105" height="24" rx="7" fill="#FF4D5A" fill-opacity=".20" stroke="#FF4D5A" stroke-opacity=".55" stroke-width="1.4"/>
+        <circle cx="52.5" cy="244" r="4" fill="#FF4D5A"/>
+      </g>
+      <!-- 列 C -->
+      <g transform="translate(310 0)">
+        <rect y="112" width="105" height="24" rx="7" fill="#141B28" stroke="#232E42" stroke-width="1.4"/>
+        <rect y="142" width="105" height="24" rx="7" fill="#FF4D5A" fill-opacity=".20" stroke="#FF4D5A" stroke-opacity=".55" stroke-width="1.4"/>
+        <circle cx="52.5" cy="154" r="4" fill="#FF4D5A"/>
+        <rect y="172" width="105" height="24" rx="7" fill="#141B28" stroke="#232E42" stroke-width="1.4"/>
+        <rect y="202" width="105" height="24" rx="7" fill="#FF4D5A" fill-opacity=".20" stroke="#FF4D5A" stroke-opacity=".55" stroke-width="1.4"/>
+        <circle cx="52.5" cy="214" r="4" fill="#FF4D5A"/>
+        <rect y="232" width="105" height="24" rx="7" fill="#FF4D5A" fill-opacity=".20" stroke="#FF4D5A" stroke-opacity=".55" stroke-width="1.4"/>
+        <circle cx="52.5" cy="244" r="4" fill="#FF4D5A"/>
+      </g>
+
+      <!-- 板块标签 -->
+      <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+         font-size="19" fill="#8A99B0" text-anchor="middle">
+        <text x="42" y="129">A</text>
+        <text x="42" y="159">B</text>
+        <text x="42" y="189">C</text>
+        <text x="42" y="219">D</text>
+        <text x="42" y="249">E</text>
+      </g>
+
+      <!-- 共振行高亮：三个窗口同时进榜 -->
+      <rect x="64" y="136" width="356" height="36" rx="9" fill="#FF4D5A" fill-opacity=".08"
+            stroke="#FF4D5A" stroke-opacity=".50" stroke-width="1.4" stroke-dasharray="6 4"/>
+    </g>
+
+    <!-- 结论 -->
+    <g transform="translate(24 256)">
+      <rect width="392" height="36" rx="10" fill="#1B1220" stroke="#3A2029" stroke-width="1.4"/>
+      <circle cx="20" cy="18" r="4.5" fill="#FF4D5A"/>
+      <text x="36" y="24" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="18" fill="#FF8A92">共振板块 → board_etf_match.py</text>
+    </g>
+  </g>
+</svg>
