@@ -8,3 +8,6 @@ dist/
 
 # Virtual environments
 .venv
+
+# Local backups
+.backup/
