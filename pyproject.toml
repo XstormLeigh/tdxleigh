@@ -1,0 +1,37 @@
+[project]
+name = "tdxleigh"
+version = "0.1.0"
+description = "板块共振排行与高相关 ETF 匹配（通达信 MAC 行情）"
+readme = "README.md"
+authors = [
+    { name = "XstormLeigh", email = "49313930+XstormLeigh@users.noreply.github.com" },
+]
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "click>=8.5.0",
+    "easy-tdx==1.32.7",
+    "numpy>=2.0,<3",
+    "pandas>=2.0,<3",
+    "tabulate>=0.10.0",
+    "wcwidth>=0.9.4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
+
+[tool.uv]
+package = false
+
+[[tool.uv.index]]
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
+
+[tool.uv.sources]
+easy-tdx = { path = "vendor/wheels/easy_tdx-1.32.7-py3-none-any.whl" }
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["test"]
