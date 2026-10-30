@@ -19,6 +19,7 @@ from board_etf_match import (
     combine_board_codes,
     extract_theme,
     filter_etf_universe,
+    find_boards_by_keywords,
     match_boards_to_etfs,
     name_hits,
     rank_shortlist,
@@ -263,6 +264,24 @@ def test_match_boards_to_etfs_end_to_end() -> None:
     assert set(result["board_name"]) == {"航天装备"}
     assert result["code"].iloc[0] == "159206"
     assert result["amount_mn"].iloc[0] == pytest.approx(900.0)
+
+
+def test_find_boards_by_keywords() -> None:
+    board_list = pd.DataFrame(
+        {
+            "code": [880729, "880952", "881289", "880952"],
+            "name": ["CXO概念", "卫星导航", "航天装备", "卫星导航"],
+        }
+    )
+    found = find_boards_by_keywords(board_list, ("卫星",))
+    assert found.to_dict("list") == {"code": ["880952"], "name": ["卫星导航"]}
+
+    both = find_boards_by_keywords(board_list, ("卫星", "航天"))
+    assert both["code"].tolist() == ["880952", "881289"]
+
+    assert find_boards_by_keywords(board_list, ("白酒",)).empty
+    assert find_boards_by_keywords(board_list, ()).empty
+    assert list(find_boards_by_keywords(pd.DataFrame(), ("卫星",)).columns) == ["code", "name"]
 
 
 def test_combine_board_codes_trailing_and_legacy() -> None:

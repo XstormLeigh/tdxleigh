@@ -515,8 +515,28 @@ def combine_board_codes(boards_raw: str, board_codes: Sequence[str]) -> str:
     return ",".join(ordered)
 
 
-def resolve_boards(raw: str, consensus_args: tuple[str, str, int], progress: bool) -> pd.DataFrame:
-    """板块代码非空时查名称；否则先跑共振榜。返回 ``code, name``。"""
+def find_boards_by_keywords(board_list: pd.DataFrame, keywords: Sequence[str]) -> pd.DataFrame:
+    """板块名称含任一关键词的板块，按代码去重。返回 ``code, name``。"""
+    columns = ["code", "name"]
+    if board_list.empty or not keywords:
+        return pd.DataFrame(columns=columns)
+    boards = board_list.assign(
+        code=board_list["code"].astype(str), name=board_list["name"].astype(str)
+    )
+    hit = name_hits(boards["name"], keywords) > 0
+    return boards.loc[hit, columns].drop_duplicates("code").reset_index(drop=True)
+
+
+def resolve_boards(
+    raw: str,
+    consensus_args: tuple[str, str, int],
+    progress: bool,
+    keywords: Sequence[str] = (),
+) -> pd.DataFrame:
+    """确定要匹配的板块，返回 ``code, name``。
+
+    优先级：板块代码 → 名称含关键词的板块 → 共振榜。
+    """
     from easy_tdx.cli.conn import get_mac_client
     from easy_tdx.mac.enums import BoardType
 
@@ -526,6 +546,11 @@ def resolve_boards(raw: str, consensus_args: tuple[str, str, int], progress: boo
             board_list = client.get_board_list(BoardType.ALL)
         names = dict(zip(board_list["code"].astype(str), board_list["name"].astype(str)))
         return pd.DataFrame({"code": codes, "name": [names.get(c, "") for c in codes]})
+
+    if keywords:
+        with get_mac_client() as client:
+            board_list = client.get_board_list(BoardType.ALL)
+        return find_boards_by_keywords(board_list, keywords)
 
     from board_change_consensus import build_consensus, parse_windows
     from easy_tdx.cli.parsers import parse_board_type
@@ -549,7 +574,12 @@ def resolve_boards(raw: str, consensus_args: tuple[str, str, int], progress: boo
 @click.option("--type", "board_type", default="HY", help="共振榜板块类型: HY/GN/FG/DQ/ALL")
 @click.option("--days", "days_raw", default="3,5,10", help="共振榜回溯交易日数")
 @click.option("--top", "board_top", default=10, type=int, help="共振榜每窗口 Top-N 门槛")
-@click.option("--keywords", "keywords_raw", default="", help="追加 ETF 名称关键词，逗号分隔")
+@click.option(
+    "--keywords",
+    "keywords_raw",
+    default="",
+    help="名称关键词，逗号分隔；不给板块代码时按此搜板块，并给名称命中的 ETF 加分",
+)
 @click.option("--etf-top", default=10, type=int, help="每个板块输出 ETF 数 (默认 10)")
 @click.option("--min-score", default=0.47, type=float, help="ETF 得分下限，仅保留 score > 此值 (默认 0.47)")
 @click.option("--shortlist", default=30, type=int, help="日线 R² 短名单长度 (默认 30)")
@@ -589,7 +619,8 @@ def main(
 ) -> None:
     """为板块匹配高相关 ETF。
 
-    板块代码写在**所有选项之后**（可多个，如 ``881289 881007``）；省略则先跑共振榜。
+    板块代码写在**所有选项之后**（可多个，如 ``881289 881007``）；省略时若给了
+    ``--keywords`` 则匹配名称含关键词的板块，否则先跑共振榜。
 
     示例：
 
@@ -600,11 +631,15 @@ def main(
     if min(etf_top, shortlist, connections, daily_days, intraday_days, board_top) < 1:
         raise click.UsageError("--etf-top/--shortlist/--connections/--*-days/--top 必须 >= 1")
 
+    extra = tuple(k.strip() for k in keywords_raw.split(",") if k.strip())
     boards_spec = combine_board_codes(boards_raw, board_codes)
-    boards = resolve_boards(boards_spec, (board_type, days_raw, board_top), progress)
+    boards = resolve_boards(boards_spec, (board_type, days_raw, board_top), progress, extra)
     if boards.empty:
-        click.echo("没有可匹配的板块。", err=True)
+        hint = f"（名称含 {','.join(extra)} 的板块不存在）" if extra and not boards_spec else ""
+        click.echo(f"没有可匹配的板块。{hint}", err=True)
         return
+    if extra and not boards_spec and progress:
+        click.echo(f"关键词板块: {' '.join(boards['code'] + ' ' + boards['name'])}", err=True)
 
     config = MatchConfig(
         top_n=etf_top,
@@ -614,7 +649,6 @@ def main(
         min_obs_intraday=max(2, int(intraday_days * BARS_PER_DAY_MINUTES // int(freq) * 0.5)),
         one_per_theme=not keep_duplicates,
     )
-    extra = tuple(k.strip() for k in keywords_raw.split(",") if k.strip())
     plan = build_kline_plan(daily_days, intraday_days, int(freq))
     excluded = EXCLUDED_NAME_KEYWORDS if include_broad else (*EXCLUDED_NAME_KEYWORDS, *BROAD_MARKET_KEYWORDS)
 

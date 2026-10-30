@@ -31,7 +31,123 @@ uv run python board_change_consensus.py --help
 uv run python board_etf_match.py --help
 ```
 
-Nu 壳别名示例（见 `config.nu`）：`tdxe` → `uv run … easy-tdx`，`tdxp` → `uv run … python`。
+---
+
+## Shell 别名（Nushell / PowerShell）
+
+日常使用的快捷命令，来源于 Nushell 的 `config.nu`。两套写法功能完全一致，**按你用的 shell 二选一**，不要混贴。
+
+### 别名说明
+
+基础别名（其余别名都建立在它们之上，可在任意目录调用）：
+
+| 别名 | 展开为 | 说明 |
+|------|--------|------|
+| `tdxe` | `uv run --directory <项目目录> easy-tdx` | 在本项目的 uv 环境里调用 `easy-tdx` CLI |
+| `tdxp` | `uv run --directory <项目目录> python` | 在本项目的 uv 环境里运行 Python 脚本（工作目录切到项目，脚本可用相对路径） |
+
+行业板块（HY）：
+
+| 别名 | 说明 |
+|------|------|
+| `hy` | 行业板块实时排名，按**主力净流入**（`main_net_amount`）排序，取前 10，看今天资金往哪个行业走 |
+| `hy35` | 行业**短线共振**：3 日、5 日涨幅都进前 5 的行业 |
+| `hy35713` | 行业**多周期共振**：3/5/7/13 日涨幅都进前 10，筛出短中期一致走强的行业 |
+| `hy23` | 行业 23 日（约一个月）涨幅榜前 5，看中期主线 |
+
+概念板块（GN）：
+
+| 别名 | 说明 |
+|------|------|
+| `gn` | 概念板块实时排名，按**成交额**排序，取前 10，看今天最活跃的题材 |
+| `gn35` | 概念**短线共振**：3 日、5 日涨幅都进前 5 的概念 |
+| `gn10` | 概念 10 日涨幅榜前 10，看近两周的强势题材 |
+
+市场与个券：
+
+| 别名 | 说明 |
+|------|------|
+| `mkstats` | 全市场统计（涨跌家数等），判断整体情绪 |
+| `clun516` | 对深市 `159516` 做缠论分析，30 分钟级别多级别联立，取最近 120 根 K 线 |
+
+板块 → ETF 匹配（板块代码写在最后，可多个）：
+
+| 别名 | 用法示例 | 说明 |
+|------|----------|------|
+| `etf` | `etf 881289 881007` | 每个板块一行，只列匹配到的 ETF 代码，方便复制下单 |
+| `kwdetf` | `kwdetf 卫星` / `kwdetf 卫星,军工 881289` | 只给关键词：自动找出名称含关键词的板块（如“卫星导航”）再匹配 ETF；关键词后再跟板块代码：只匹配这些板块。两种情况下名称含关键词的 ETF 都会进入候选并加分，表格输出 |
+| `tabletf` | `tabletf 880729` | 表格输出，日内回归用最近 **3 个交易日的 30 分钟** K 线，反映最新的短线跟随度 |
+
+`etf`、`kwdetf`、`tabletf` 后面还可以追加 `board_etf_match.py` 的其他选项（如 `--min-score 0.5`），但选项要放在板块代码**之前**。
+
+### Nushell 版本（`config.nu`）
+
+```nu
+# ===== tdxleigh aliases (Nushell) =====
+const TDXLEIGH_DIR = "P:\\Python-Scripts\\QMT\\tdxleigh"
+
+# --- 基础 ---
+alias tdxe = uv run --directory $TDXLEIGH_DIR easy-tdx
+alias tdxp = uv run --directory $TDXLEIGH_DIR python
+
+# --- 行业板块 HY ---
+alias hy      = tdxe board-ranking --type HY --top 10 --sort-by main_net_amount --table
+alias hy35    = tdxp board_change_consensus.py --type HY --days 3,5 --top 5 --table
+alias hy35713 = tdxp board_change_consensus.py --type HY --days 3,5,7,13 --top 10 --table
+alias hy23    = tdxe board-change-ranking --type HY --days 23 --top 5 --table
+
+# --- 概念板块 GN ---
+alias gn   = tdxe board-ranking --type GN --top 10 --sort-by amount --table
+alias gn35 = tdxp board_change_consensus.py --type GN --days 3,5 --top 5 --table
+alias gn10 = tdxe board-change-ranking --type GN --days 10 --top 10 --table
+
+# --- 市场 / 个券 ---
+alias mkstats = tdxe market-stat --table
+alias clun516 = tdxe chanlun SZ 159516 --multi-level 30MIN --count 120 --table
+
+# --- 板块 → ETF ---
+alias etf     = tdxp board_etf_match.py --tickers-only
+alias kwdetf  = tdxp board_etf_match.py --table --keywords
+alias tabletf = tdxp board_etf_match.py --table --freq 30 --intraday-days 3
+```
+
+### PowerShell 版本（`$PROFILE`）
+
+PowerShell 的 `Set-Alias` 不能带参数，所以这里用函数，`@args` 把你追加的参数（板块代码等）原样传下去。粘贴到 `$PROFILE`（用 `notepad $PROFILE` 打开）后重开终端即可。
+
+> **注意：** PowerShell 会把裸写的 `3,5` 当成数组拆开传参，因此 `--days` 的值都加了单引号；调用 `kwdetf` 时关键词也要加引号：`kwdetf '卫星,军工' 881289`。
+
+```powershell
+# ===== tdxleigh aliases (PowerShell) =====
+$TDXLEIGH_DIR = 'P:\Python-Scripts\QMT\tdxleigh'
+
+# 让中文板块名 / ETF 名正常显示
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+
+# --- 基础 ---
+function tdxe { uv run --directory $TDXLEIGH_DIR easy-tdx @args }
+function tdxp { uv run --directory $TDXLEIGH_DIR python @args }
+
+# --- 行业板块 HY ---
+function hy      { tdxe board-ranking --type HY --top 10 --sort-by main_net_amount --table @args }
+function hy35    { tdxp board_change_consensus.py --type HY --days '3,5' --top 5 --table @args }
+function hy35713 { tdxp board_change_consensus.py --type HY --days '3,5,7,13' --top 10 --table @args }
+function hy23    { tdxe board-change-ranking --type HY --days 23 --top 5 --table @args }
+
+# --- 概念板块 GN ---
+function gn   { tdxe board-ranking --type GN --top 10 --sort-by amount --table @args }
+function gn35 { tdxp board_change_consensus.py --type GN --days '3,5' --top 5 --table @args }
+function gn10 { tdxe board-change-ranking --type GN --days 10 --top 10 --table @args }
+
+# --- 市场 / 个券 ---
+function mkstats { tdxe market-stat --table @args }
+function clun516 { tdxe chanlun SZ 159516 --multi-level 30MIN --count 120 --table @args }
+
+# --- 板块 → ETF ---
+function etf     { tdxp board_etf_match.py --tickers-only @args }
+function kwdetf  { tdxp board_etf_match.py --table --keywords @args }
+function tabletf { tdxp board_etf_match.py --table --freq 30 --intraday-days 3 @args }
+```
 
 ---
 
@@ -44,6 +160,21 @@ Nu 壳别名示例（见 `config.nu`）：`tdxe` → `uv run … easy-tdx`，`td
 在指定板块类型（行业 HY、概念 GN 等）下，对每个板块只拉一次日 K（长度 ≈ `max(days) + 缓冲`），一次算出各窗口涨跌幅，再筛出在**每一个**窗口都进入 Top-N 的板块。
 
 等价于多次运行 `easy-tdx board-change-ranking` 后人工找交集，但通常快约 3 倍（少重复拉 K 线）。
+
+### 输出示例
+
+原本做法是分别运行 `easy-tdx board-change-ranking`，再人工比对这样的单日榜单：
+
+<p align="center">
+  <img src="./assets/readme/screenshot-board-ranking-hy.jpg" width="49%" alt="easy-tdx 行业板块单日涨幅榜输出示例">
+  <img src="./assets/readme/screenshot-board-ranking-gn.png" width="49%" alt="easy-tdx 概念板块单日榜单输出示例">
+</p>
+
+本脚本一条命令直接得到交集（示例：`--type HY --days 3,5`，扫描进度条走 stderr）：
+
+<p align="center">
+  <img src="./assets/readme/screenshot-consensus-output.png" width="100%" alt="板块共振榜输出：石油化工、油气开采在 3 日与 5 日两个窗口都进榜，avg_rank 分别为 1.5 与 2.5">
+</p>
 
 ### 用法
 
@@ -94,11 +225,26 @@ uv run python board_change_consensus.py --type HY --asc --table          # 跌�
 ```bash
 uv run python board_etf_match.py --table                           # 先跑共振榜，再逐板块匹配
 uv run python board_etf_match.py --table 881289
+uv run python board_etf_match.py --keywords 卫星 --table              # 不给代码：按名称搜“卫星”相关板块
 uv run python board_etf_match.py --keywords 卫星,军工 --tickers-only 881289
 uv run python board_etf_match.py --freq 5 --intraday-days 10 881289
 uv run python board_etf_match.py --include-broad --keep-duplicates 881289
 uv run python board_etf_match.py --tickers-only 881289 881007
 ```
+
+### 输出示例
+
+板块 → ETF 的完整匹配表（示例：`--keywords 卫星`，板块 `880546 卫星导航`）：
+
+<p align="center">
+  <img src="./assets/readme/screenshot-etf-match.png" width="100%" alt="ETF 匹配输出：卫星导航板块的 Top-10 场内 ETF，含 score、日内/日线 R² 与 β、5 日涨跌幅与成交额">
+</p>
+
+运行进度与 `--tickers-only` 精简输出（示例：板块 `881011 石油化工`）：
+
+<p align="center">
+  <img src="./assets/readme/screenshot-etf-tickers-only.png" width="630" alt="board_etf_match.py 运行进度（ETF 日线 195/195、板块日内 32/32）与 tickers-only 输出的四个 ETF 代码">
+</p>
 
 ### 输出列
 
