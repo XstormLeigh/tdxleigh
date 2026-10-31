@@ -33,124 +33,6 @@ uv run python board_etf_match.py --help
 
 ---
 
-## Shell 别名（Nushell / PowerShell）
-
-日常使用的快捷命令，来源于 Nushell 的 `config.nu`。两套写法功能完全一致，**按你用的 shell 二选一**，不要混贴。
-
-### 别名说明
-
-基础别名（其余别名都建立在它们之上，可在任意目录调用）：
-
-| 别名 | 展开为 | 说明 |
-|------|--------|------|
-| `tdxe` | `uv run --directory <项目目录> easy-tdx` | 在本项目的 uv 环境里调用 `easy-tdx` CLI |
-| `tdxp` | `uv run --directory <项目目录> python` | 在本项目的 uv 环境里运行 Python 脚本（工作目录切到项目，脚本可用相对路径） |
-
-行业板块（HY）：
-
-| 别名 | 说明 |
-|------|------|
-| `hy` | 行业板块实时排名，按**主力净流入**（`main_net_amount`）排序，取前 10，看今天资金往哪个行业走 |
-| `hy35` | 行业**短线共振**：3 日、5 日涨幅都进前 5 的行业 |
-| `hy35713` | 行业**多周期共振**：3/5/7/13 日涨幅都进前 10，筛出短中期一致走强的行业 |
-| `hy23` | 行业 23 日（约一个月）涨幅榜前 5，看中期主线 |
-
-概念板块（GN）：
-
-| 别名 | 说明 |
-|------|------|
-| `gn` | 概念板块实时排名，按**成交额**排序，取前 10，看今天最活跃的题材 |
-| `gn35` | 概念**短线共振**：3 日、5 日涨幅都进前 5 的概念 |
-| `gn10` | 概念 10 日涨幅榜前 10，看近两周的强势题材 |
-
-市场与个券：
-
-| 别名 | 说明 |
-|------|------|
-| `mkstats` | 全市场统计（涨跌家数等），判断整体情绪 |
-| `clun516` | 对深市 `159516` 做缠论分析，30 分钟级别多级别联立，取最近 120 根 K 线 |
-
-板块 → ETF 匹配（板块代码写在最后，可多个）：
-
-| 别名 | 用法示例 | 说明 |
-|------|----------|------|
-| `etf` | `etf 881289 881007` | 每个板块一行，只列匹配到的 ETF 代码，方便复制下单 |
-| `kwdetf` | `kwdetf 卫星` / `kwdetf 卫星,军工 881289` | 只给关键词：自动找出名称含关键词的板块（如“卫星导航”）再匹配 ETF；关键词后再跟板块代码：只匹配这些板块。两种情况下名称含关键词的 ETF 都会进入候选并加分，表格输出 |
-| `tabletf` | `tabletf 880729` | 表格输出，日内回归用最近 **3 个交易日的 30 分钟** K 线，反映最新的短线跟随度 |
-
-`etf`、`kwdetf`、`tabletf` 后面还可以追加 `board_etf_match.py` 的其他选项（如 `--min-score 0.5`），但选项要放在板块代码**之前**。
-
-### Nushell 版本（`config.nu`）
-
-```nu
-# ===== tdxleigh aliases (Nushell) =====
-const TDXLEIGH_DIR = "P:\\Python-Scripts\\QMT\\tdxleigh"
-
-# --- 基础 ---
-alias tdxe = uv run --directory $TDXLEIGH_DIR easy-tdx
-alias tdxp = uv run --directory $TDXLEIGH_DIR python
-
-# --- 行业板块 HY ---
-alias hy      = tdxe board-ranking --type HY --top 10 --sort-by main_net_amount --table
-alias hy35    = tdxp board_change_consensus.py --type HY --days 3,5 --top 5 --table
-alias hy35713 = tdxp board_change_consensus.py --type HY --days 3,5,7,13 --top 10 --table
-alias hy23    = tdxe board-change-ranking --type HY --days 23 --top 5 --table
-
-# --- 概念板块 GN ---
-alias gn   = tdxe board-ranking --type GN --top 10 --sort-by amount --table
-alias gn35 = tdxp board_change_consensus.py --type GN --days 3,5 --top 5 --table
-alias gn10 = tdxe board-change-ranking --type GN --days 10 --top 10 --table
-
-# --- 市场 / 个券 ---
-alias mkstats = tdxe market-stat --table
-alias clun516 = tdxe chanlun SZ 159516 --multi-level 30MIN --count 120 --table
-
-# --- 板块 → ETF ---
-alias etf     = tdxp board_etf_match.py --tickers-only
-alias kwdetf  = tdxp board_etf_match.py --table --keywords
-alias tabletf = tdxp board_etf_match.py --table --freq 30 --intraday-days 3
-```
-
-### PowerShell 版本（`$PROFILE`）
-
-PowerShell 的 `Set-Alias` 不能带参数，所以这里用函数，`@args` 把你追加的参数（板块代码等）原样传下去。粘贴到 `$PROFILE`（用 `notepad $PROFILE` 打开）后重开终端即可。
-
-> **注意：** PowerShell 会把裸写的 `3,5` 当成数组拆开传参，因此 `--days` 的值都加了单引号；调用 `kwdetf` 时关键词也要加引号：`kwdetf '卫星,军工' 881289`。
-
-```powershell
-# ===== tdxleigh aliases (PowerShell) =====
-$TDXLEIGH_DIR = 'P:\Python-Scripts\QMT\tdxleigh'
-
-# 让中文板块名 / ETF 名正常显示
-[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
-
-# --- 基础 ---
-function tdxe { uv run --directory $TDXLEIGH_DIR easy-tdx @args }
-function tdxp { uv run --directory $TDXLEIGH_DIR python @args }
-
-# --- 行业板块 HY ---
-function hy      { tdxe board-ranking --type HY --top 10 --sort-by main_net_amount --table @args }
-function hy35    { tdxp board_change_consensus.py --type HY --days '3,5' --top 5 --table @args }
-function hy35713 { tdxp board_change_consensus.py --type HY --days '3,5,7,13' --top 10 --table @args }
-function hy23    { tdxe board-change-ranking --type HY --days 23 --top 5 --table @args }
-
-# --- 概念板块 GN ---
-function gn   { tdxe board-ranking --type GN --top 10 --sort-by amount --table @args }
-function gn35 { tdxp board_change_consensus.py --type GN --days '3,5' --top 5 --table @args }
-function gn10 { tdxe board-change-ranking --type GN --days 10 --top 10 --table @args }
-
-# --- 市场 / 个券 ---
-function mkstats { tdxe market-stat --table @args }
-function clun516 { tdxe chanlun SZ 159516 --multi-level 30MIN --count 120 --table @args }
-
-# --- 板块 → ETF ---
-function etf     { tdxp board_etf_match.py --tickers-only @args }
-function kwdetf  { tdxp board_etf_match.py --table --keywords @args }
-function tabletf { tdxp board_etf_match.py --table --freq 30 --intraday-days 3 @args }
-```
-
----
-
 ## `board_change_consensus.py` — 板块共振榜
 
 <img src="./assets/readme/consensus-faster.svg" width="100%" alt="原本做法是对每个窗口连跑一次 easy-tdx 并人工比对三张榜单；本脚本改为每个板块只拉一次日 K 线、一次算出全部窗口涨跌幅并自动取交集，约快三倍">
@@ -256,6 +138,146 @@ uv run python board_etf_match.py --tickers-only 881289 881007
 
 ```bash
 uv run pytest
+```
+
+---
+
+## 附录：Shell 别名（Nushell / PowerShell）
+
+> 这一节与工具本身无关，只是把正文里那些 `uv run …` 长命令缩成一个词的**可选**配置。不需要就直接跳过。
+
+### 别名写在哪、怎么改
+
+| Shell | 配置文件 | 打开方式 |
+|------|----------|----------|
+| Nushell | `%APPDATA%\nushell\config.nu` | `code $nu.config-path` |
+| PowerShell 7（`pwsh`） | `~\Documents\PowerShell\Microsoft.PowerShell_profile.ps1` | `code $PROFILE` / `notepad $PROFILE` |
+| Windows PowerShell 5.1 | `~\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` | 同上 |
+
+路径以 shell 自己的变量为准：**`$PROFILE` 的取值随 PowerShell 版本而变**（本机 5.1 与 7 指向两个不同目录），先 `echo $PROFILE` 确认再动手。WezTerm 只是终端模拟器，不决定配置文件位置。
+
+**操作步骤：**
+
+1. 打开上表中属于你那个 shell 的文件。文件不存在就新建：PowerShell 用 `New-Item -Path $PROFILE -ItemType File -Force`；Nushell 先 `print $nu.config-path` 看路径，再新建同名文件。
+2. 把下面对应 shell 的代码块**整段**粘贴进去。两套写法不要混贴。
+3. 改一处路径：`TDXLEIGH_DIR`（Nushell）/ `$TDXLEIGH_DIR`（PowerShell）—— 填本机仓库的实际路径。仓库换位置后只需要再改这一处。
+4. 让它生效：重开一个终端窗口即可；不想重开的话，Nushell 执行 `source $nu.config-path`，PowerShell 执行 `. $PROFILE`。
+5. PowerShell 若提示禁止运行脚本，先跑一次 `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`。
+
+日常要调的是别名右侧的命令 —— 它们就是正文 CLI 用法里那些 `uv run …` 命令的缩写形式，改参数即可，不用动左侧别名名。
+
+### 别名说明
+
+基础别名（其余别名都建立在它们之上，可在任意目录调用）：
+
+| 别名 | 展开为 | 说明 |
+|------|--------|------|
+| `tdxe` | `uv run --directory <项目目录> easy-tdx` | 在本项目的 uv 环境里调用 `easy-tdx` CLI |
+| `tdxp` | `uv run --directory <项目目录> python` | 在本项目的 uv 环境里运行 Python 脚本（工作目录切到项目，脚本可用相对路径） |
+
+行业板块（HY）：
+
+| 别名 | 说明 |
+|------|------|
+| `hy` | 行业板块实时排名，按**主力净流入**（`main_net_amount`）排序，取前 10，看今天资金往哪个行业走 |
+| `hy35` | 行业**短线共振**：3 日、5 日涨幅都进前 5 的行业 |
+| `hy35713` | 行业**多周期共振**：3/5/7/13 日涨幅都进前 10，筛出短中期一致走强的行业 |
+| `hy23` | 行业 23 日（约一个月）涨幅榜前 5，看中期主线 |
+
+概念板块（GN）：
+
+| 别名 | 说明 |
+|------|------|
+| `gn` | 概念板块实时排名，按**成交额**排序，取前 10，看今天最活跃的题材 |
+| `gn35` | 概念**短线共振**：3 日、5 日涨幅都进前 5 的概念 |
+| `gn10` | 概念 10 日涨幅榜前 10，看近两周的强势题材 |
+
+市场与个券：
+
+| 别名 | 说明 |
+|------|------|
+| `mkstats` | 全市场统计（涨跌家数等），判断整体情绪 |
+| `clun516` | 对深市 `159516` 做缠论分析，30 分钟级别多级别联立，取最近 120 根 K 线 |
+
+板块 → ETF 匹配（板块代码写在最后，可多个）：
+
+| 别名 | 用法示例 | 说明 |
+|------|----------|------|
+| `etf` | `etf 881289 881007` | 每个板块一行，只列匹配到的 ETF 代码，方便复制下单 |
+| `kwdetf` | `kwdetf 卫星` / `kwdetf 卫星,军工 881289` | 只给关键词：自动找出名称含关键词的板块（如“卫星导航”）再匹配 ETF；关键词后再跟板块代码：只匹配这些板块。两种情况下名称含关键词的 ETF 都会进入候选并加分，表格输出 |
+| `tabletf` | `tabletf 880729` | 表格输出，日内回归用最近 **3 个交易日的 30 分钟** K 线，反映最新的短线跟随度 |
+
+`etf`、`kwdetf`、`tabletf` 后面还可以追加 `board_etf_match.py` 的其他选项（如 `--min-score 0.5`），但选项要放在板块代码**之前**。
+
+### Nushell 版本（`config.nu`）
+
+粘贴到 `config.nu` 末尾即可（`code $nu.config-path` 打开该文件）。
+
+```nu
+# ===== tdxleigh aliases (Nushell) =====
+const TDXLEIGH_DIR = "P:\\Python-Scripts\\QMT\\tdxleigh"
+
+# --- 基础 ---
+alias tdxe = uv run --directory $TDXLEIGH_DIR easy-tdx
+alias tdxp = uv run --directory $TDXLEIGH_DIR python
+
+# --- 行业板块 HY ---
+alias hy      = tdxe board-ranking --type HY --top 10 --sort-by main_net_amount --table
+alias hy35    = tdxp board_change_consensus.py --type HY --days 3,5 --top 5 --table
+alias hy35713 = tdxp board_change_consensus.py --type HY --days 3,5,7,13 --top 10 --table
+alias hy23    = tdxe board-change-ranking --type HY --days 23 --top 5 --table
+
+# --- 概念板块 GN ---
+alias gn   = tdxe board-ranking --type GN --top 10 --sort-by amount --table
+alias gn35 = tdxp board_change_consensus.py --type GN --days 3,5 --top 5 --table
+alias gn10 = tdxe board-change-ranking --type GN --days 10 --top 10 --table
+
+# --- 市场 / 个券 ---
+alias mkstats = tdxe market-stat --table
+alias clun516 = tdxe chanlun SZ 159516 --multi-level 30MIN --count 120 --table
+
+# --- 板块 → ETF ---
+alias etf     = tdxp board_etf_match.py --tickers-only
+alias kwdetf  = tdxp board_etf_match.py --table --keywords
+alias tabletf = tdxp board_etf_match.py --table --freq 30 --intraday-days 3
+```
+
+### PowerShell 版本（`$PROFILE`）
+
+PowerShell 的 `Set-Alias` 不能带参数，所以这里用函数，`@args` 把你追加的参数（板块代码等）原样传下去。粘贴到 `$PROFILE`（用 `notepad $PROFILE` 打开）后重开终端即可。
+
+> **注意：** PowerShell 会把裸写的 `3,5` 当成数组拆开传参，因此 `--days` 的值都加了单引号；调用 `kwdetf` 时关键词也要加引号：`kwdetf '卫星,军工' 881289`。
+
+```powershell
+# ===== tdxleigh aliases (PowerShell) =====
+$TDXLEIGH_DIR = 'P:\Python-Scripts\QMT\tdxleigh'
+
+# 让中文板块名 / ETF 名正常显示
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+
+# --- 基础 ---
+function tdxe { uv run --directory $TDXLEIGH_DIR easy-tdx @args }
+function tdxp { uv run --directory $TDXLEIGH_DIR python @args }
+
+# --- 行业板块 HY ---
+function hy      { tdxe board-ranking --type HY --top 10 --sort-by main_net_amount --table @args }
+function hy35    { tdxp board_change_consensus.py --type HY --days '3,5' --top 5 --table @args }
+function hy35713 { tdxp board_change_consensus.py --type HY --days '3,5,7,13' --top 10 --table @args }
+function hy23    { tdxe board-change-ranking --type HY --days 23 --top 5 --table @args }
+
+# --- 概念板块 GN ---
+function gn   { tdxe board-ranking --type GN --top 10 --sort-by amount --table @args }
+function gn35 { tdxp board_change_consensus.py --type GN --days '3,5' --top 5 --table @args }
+function gn10 { tdxe board-change-ranking --type GN --days 10 --top 10 --table @args }
+
+# --- 市场 / 个券 ---
+function mkstats { tdxe market-stat --table @args }
+function clun516 { tdxe chanlun SZ 159516 --multi-level 30MIN --count 120 --table @args }
+
+# --- 板块 → ETF ---
+function etf     { tdxp board_etf_match.py --tickers-only @args }
+function kwdetf  { tdxp board_etf_match.py --table --keywords @args }
+function tabletf { tdxp board_etf_match.py --table --freq 30 --intraday-days 3 @args }
 ```
 
 ## License
