@@ -142,7 +142,7 @@ uv run pytest
 
 ---
 
-## 附录：Shell 别名（Nushell / PowerShell）
+## 附录：Shell 别名（Nushell / PowerShell / WSL Bash）
 
 > 这一节与工具本身无关，只是把正文里那些 `uv run …` 长命令缩成一个词的**可选**配置。不需要就直接跳过。
 
@@ -153,6 +153,7 @@ uv run pytest
 | Nushell | `%APPDATA%\nushell\config.nu` | `code $nu.config-path` |
 | PowerShell 7（`pwsh`） | `~\Documents\PowerShell\Microsoft.PowerShell_profile.ps1` | `code $PROFILE` / `notepad $PROFILE` |
 | Windows PowerShell 5.1 | `~\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` | 同上 |
+| Bash（WSL / Ubuntu） | `~/.bash_aliases` | `nano ~/.bash_aliases`（Ubuntu 的 `~/.bashrc` 会自动加载它，不用改 `.bashrc`） |
 
 路径以 shell 自己的变量为准：**`$PROFILE` 的取值随 PowerShell 版本而变**（本机 5.1 与 7 指向两个不同目录），先 `echo $PROFILE` 确认再动手。WezTerm 只是终端模拟器，不决定配置文件位置。
 
@@ -160,8 +161,8 @@ uv run pytest
 
 1. 打开上表中属于你那个 shell 的文件。文件不存在就新建：PowerShell 用 `New-Item -Path $PROFILE -ItemType File -Force`；Nushell 先 `print $nu.config-path` 看路径，再新建同名文件。
 2. 把下面对应 shell 的代码块**整段**粘贴进去。两套写法不要混贴。
-3. 改一处路径：`TDXLEIGH_DIR`（Nushell）/ `$TDXLEIGH_DIR`（PowerShell）—— 填本机仓库的实际路径。仓库换位置后只需要再改这一处。
-4. 让它生效：重开一个终端窗口即可；不想重开的话，Nushell 执行 `source $nu.config-path`，PowerShell 执行 `. $PROFILE`。
+3. 改一处路径：`TDXLEIGH_DIR`（Nushell / Bash）/ `$TDXLEIGH_DIR`（PowerShell）—— 填本机仓库的实际路径。仓库换位置后只需要再改这一处。
+4. 让它生效：重开一个终端窗口即可；不想重开的话，Nushell 执行 `source $nu.config-path`，PowerShell 执行 `. $PROFILE`，Bash 执行 `source ~/.bashrc`。
 5. PowerShell 若提示禁止运行脚本，先跑一次 `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`。
 
 日常要调的是别名右侧的命令 —— 它们就是正文 CLI 用法里那些 `uv run …` 命令的缩写形式，改参数即可，不用动左侧别名名。
@@ -279,6 +280,86 @@ function etf     { tdxp board_etf_match.py --tickers-only @args }
 function kwdetf  { tdxp board_etf_match.py --table --keywords @args }
 function tabletf { tdxp board_etf_match.py --table --freq 30 --intraday-days 3 @args }
 ```
+
+### WSL / Ubuntu Bash 版本（`~/.bash_aliases`）
+
+在 WSL 里跑同一套命令，只多两件事：盘符写成 `/mnt/p`，虚拟环境要重新建一份。
+
+**第一步：确认 `P:` 挂上了，uv 装好了**
+
+```bash
+ls /mnt/p        # 应该能看到 Python-Scripts
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+`/mnt/p` 是空的、或者压根不存在（网络盘和移动盘常这样），手动挂一次：
+
+```bash
+sudo mkdir -p /mnt/p
+sudo mount -t drvfs P: /mnt/p
+```
+
+想每次开机都有，往 `/etc/fstab` 加一行：
+
+```
+P: /mnt/p drvfs defaults 0 0
+```
+
+**第二步：把下面这段放进 `~/.bash_aliases`**
+
+```bash
+# ===== tdxleigh aliases (bash / WSL) =====
+export TDXLEIGH_DIR="/mnt/p/Python-Scripts/QMT/tdxleigh"
+
+# --- 基础 ---
+# 用函数而不是 alias：Linux 侧的虚拟环境设置只作用在这两条命令上
+tdxe() { UV_PROJECT_ENVIRONMENT="$HOME/.venvs/tdxleigh" UV_LINK_MODE=copy uv run --directory "$TDXLEIGH_DIR" easy-tdx "$@"; }
+tdxp() { UV_PROJECT_ENVIRONMENT="$HOME/.venvs/tdxleigh" UV_LINK_MODE=copy uv run --directory "$TDXLEIGH_DIR" python "$@"; }
+
+# --- 行业板块 HY ---
+alias hy='tdxe board-ranking --type HY --top 10 --sort-by main_net_amount --table'
+alias hy35='tdxp board_change_consensus.py --type HY --days 3,5 --top 5 --table'
+alias hy35713='tdxp board_change_consensus.py --type HY --days 3,5,7,13 --top 10 --table'
+alias hy23='tdxe board-change-ranking --type HY --days 23 --top 5 --table'
+
+# --- 概念板块 GN ---
+alias gn='tdxe board-ranking --type GN --top 10 --sort-by amount --table'
+alias gn35='tdxp board_change_consensus.py --type GN --days 3,5 --top 5 --table'
+alias gn10='tdxe board-change-ranking --type GN --days 10 --top 10 --table'
+
+# --- 市场 / 个券 ---
+alias mkstats='tdxe market-stat --table'
+alias clun516='tdxe chanlun SZ 159516 --multi-level 30MIN --count 120 --table'
+
+# --- 板块 → ETF ---
+alias etf='tdxp board_etf_match.py --tickers-only'
+alias kwdetf='tdxp board_etf_match.py --table --keywords'
+alias tabletf='tdxp board_etf_match.py --table --freq 30 --intraday-days 3'
+```
+
+**第三步：让它生效**
+
+```bash
+source ~/.bashrc
+```
+
+#### 跟 Nushell 版比，改了什么
+
+- `const` 换成 `export`，`P:\...` 换成 `/mnt/p/...`。
+- `tdxe` / `tdxp` 写成函数而不是 `alias`，因为要在这两条命令上各挂两个环境变量。bash 的 alias 可以调用另一个别名或函数，所以 `hy` 里直接写 `tdxe` 就行，展开后照样认得这个函数。
+- 别名内容用单引号包住，`$TDXLEIGH_DIR` 才是运行时才取值。用双引号的话，值在定义那一刻就被钉死了，以后改 `TDXLEIGH_DIR` 不生效。
+- `3,5` 在 bash 里不会被拆开，所以 `--days` 不用加引号 —— 这一点跟 PowerShell 相反。
+- `UV_PROJECT_ENVIRONMENT` 让 WSL 在 `~/.venvs/tdxleigh` 建自己的虚拟环境。仓库里现有的 `.venv` 是 Windows 侧建的（里面是 `Scripts\` 而不是 `bin/`），Linux 的 Python 用不了，uv 会重建一份，第一次跑要等一会儿。
+- `UV_LINK_MODE=copy` 是保险项。缓存和虚拟环境都在 ext4 上时，硬链接本来就能用；哪天把 `UV_PROJECT_ENVIRONMENT` 指到 `/mnt/...`，跨文件系统做不了硬链接，uv 才需要退回复制。
+- alias 只在交互式 shell 里展开。写进脚本的话，直接调 `tdxe` 函数，或者先 `shopt -s expand_aliases`。
+
+#### 两个要留意的地方
+
+**行情本身不依赖 Windows。** `easy_tdx` 的 wheel 是 `py3-none-any`，纯 Python，里面没有 DLL、也没有 ctypes 调用，在线行情走 TCP，WSL 里能直接连。唯一看 `sys.platform` 的地方是 `easy_tdx/offline/paths.py` 里探测本地通达信安装目录（vipdoc）那一段，本项目的两个脚本只取在线 MAC 行情，不碰它；真要读离线数据，把 `TDX_HOME` 指到目录即可。
+
+**跨盘读文件会慢一点。** 从 `/mnt/p` 读脚本比 ext4 慢，这几条命令用起来没差别，就是每次启动多花一点点时间。
+
+要在 WSL 里转调 Windows 侧的 Nushell 别名，可以试 `nu.exe -c "hy"`；这条没在本机实测过，能不能通取决于你的 `nu.exe` 是否在 `PATH` 里。用 zsh 的话，把同一段放进 `~/.zshrc` 就行。
 
 ## License
 
